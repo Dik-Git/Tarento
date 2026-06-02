@@ -31,7 +31,7 @@ jobs:
           AZURE_STORAGE_CONTAINER: ${{ secrets.AZURE_STORAGE_CONTAINER }}
           EXPIRY_THRESHOLD_DAYS:   "30"
           RENEW_VALIDITY_DAYS:     "365"
-        run: python scripts/check_and_renew.py
+        run: python Scripts/check_and_renew.py
         continue-on-error: true
 
       - name: Send email notification
@@ -42,4 +42,4 @@ jobs:
           SMTP_USER:       ${{ secrets.SMTP_USER }}
           SMTP_PASS:       ${{ secrets.SMTP_PASS }}
           ALERT_TO_EMAILS: ${{ secrets.ALERT_TO_EMAILS }}
-        run: python scripts/send_notification.py
+        run: python Scripts/send_notification.py
