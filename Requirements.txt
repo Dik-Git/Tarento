@@ -1,0 +1,2 @@
+cryptography
+azure-storage-blob
