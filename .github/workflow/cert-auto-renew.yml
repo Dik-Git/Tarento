@@ -1,0 +1,43 @@
+name: Certificate Auto Renewal
+
+on:
+  schedule:
+    - cron: '0 8 * * *'    # runs every day at 08:00 UTC
+  workflow_dispatch:         # allows manual trigger anytime
+
+jobs:
+  auto-renew:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check and auto renew certs
+        id: renew
+        env:
+          AZURE_STORAGE_ACCOUNT:   ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+          AZURE_STORAGE_KEY:       ${{ secrets.AZURE_STORAGE_KEY }}
+          AZURE_STORAGE_CONTAINER: ${{ secrets.AZURE_STORAGE_CONTAINER }}
+          EXPIRY_THRESHOLD_DAYS:   "30"
+          RENEW_VALIDITY_DAYS:     "365"
+        run: python scripts/check_and_renew.py
+        continue-on-error: true
+
+      - name: Send email notification
+        if: always()
+        env:
+          SMTP_HOST:       ${{ secrets.SMTP_HOST }}
+          SMTP_PORT:       ${{ secrets.SMTP_PORT }}
+          SMTP_USER:       ${{ secrets.SMTP_USER }}
+          SMTP_PASS:       ${{ secrets.SMTP_PASS }}
+          ALERT_TO_EMAILS: ${{ secrets.ALERT_TO_EMAILS }}
+        run: python scripts/send_notification.py
