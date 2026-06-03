@@ -40,6 +40,8 @@ jobs:
           SMTP_HOST:       ${{ secrets.SMTP_HOST }}
           SMTP_PORT:       ${{ secrets.SMTP_PORT }}
           SMTP_USER:       ${{ secrets.SMTP_USER }}
-          SMTP_PASS:       ${{ secrets.SMTP_PASS }}
-          ALERT_TO_EMAILS: ${{ secrets.ALERT_TO_EMAILS }}
+          SMTP_PASSWORD:   ${{ secrets.SMTP_PASSWORD }}
+          SMTP_RECEIVER:   ${{ secrets.SMTP_RECEIVER }}
         run: python Scripts/send_notification.py
+  
+  
