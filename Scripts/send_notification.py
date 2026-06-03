@@ -191,9 +191,9 @@ def send_email(results: dict):
     smtp_host = os.environ["SMTP_HOST"]
     smtp_port = int(os.environ.get("SMTP_PORT", "587"))
     smtp_user = os.environ["SMTP_USER"]
-    smtp_pass = os.environ["SMTP_PASS"]
+    smtp_pass = os.environ["SMTP_PASSWORD"]           # ✅ Fixed: was SMTP_PASS
     to_list   = [e.strip() for e in
-                 os.environ["ALERT_TO_EMAILS"].split(",")]
+                 os.environ["SMTP_RECEIVER"].split(",")]  # ✅ Fixed: was ALERT_TO_EMAILS
 
     renewed = results.get("renewed", [])
     failed  = results.get("failed",  [])
@@ -204,7 +204,7 @@ def send_email(results: dict):
     elif renewed:
         subject = f"🔄 Cert Update: {len(renewed)} cert(s) auto renewed successfully"
     else:
-        subject = f"✅ Cert Check: All {len(results.get('healthy',[]))} cert(s) healthy"
+        subject = f"✅ Cert Check: All {len(results.get('healthy', []))} cert(s) healthy"
 
     msg            = MIMEMultipart("alternative")
     msg["Subject"] = subject
@@ -224,11 +224,19 @@ def send_email(results: dict):
 if __name__ == "__main__":
     print("\n📧 Sending notification email...")
 
+    # ✅ Fixed: use absolute path relative to current working directory
+    json_path = os.path.join(os.getcwd(), "cert_results.json")
+
     try:
-        with open("cert_results.json") as f:
+        with open(json_path) as f:
             results = json.load(f)
     except FileNotFoundError:
-        print("❌ cert_results.json not found")
+        print(f"❌ cert_results.json not found at: {json_path}")
+        print("   This means check_and_renew.py crashed before completing.")
+        print("   Check the previous step logs for Azure connection errors.")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"❌ cert_results.json is invalid JSON: {e}")
         sys.exit(1)
 
     send_email(results)
